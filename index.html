@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>윷놀이 · 말판</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <h1 class="app__title">
+        <svg class="app__logo" viewBox="0 0 32 32" aria-hidden="true">
+          <g transform="rotate(-15 16 16)">
+            <rect x="5.5" y="5" width="4.4" height="22" rx="2.2" fill="#f6ecd0" stroke="#c9a86a" stroke-width=".8"/>
+            <rect x="11" y="5" width="4.4" height="22" rx="2.2" fill="#b07d4b" stroke="#7a5a34" stroke-width=".7"/>
+            <rect x="12.2" y="8" width="1" height="16" rx=".5" fill="rgba(255,255,255,.45)"/>
+            <rect x="16.6" y="5" width="4.4" height="22" rx="2.2" fill="#f6ecd0" stroke="#c9a86a" stroke-width=".8"/>
+            <rect x="22.1" y="5" width="4.4" height="22" rx="2.2" fill="#b07d4b" stroke="#7a5a34" stroke-width=".7"/>
+            <rect x="23.3" y="8" width="1" height="16" rx=".5" fill="rgba(255,255,255,.45)"/>
+          </g>
+        </svg>
+        윷놀이 말판
+      </h1>
+      <p class="app__subtitle">윷은 직접 던지고, 결과만 입력하면 말 이동을 도와드려요</p>
+    </header>
+
+    <main class="layout">
+      <!-- 보드 -->
+      <section class="board-wrap" aria-label="윷판">
+        <div id="board" class="board">
+          <svg id="board-lines" class="board__lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <!-- 노드/말은 JS로 생성 -->
+        </div>
+      </section>
+
+      <!-- 컨트롤 패널 -->
+      <aside class="panel">
+        <div class="turn" id="turn-banner">
+          <span class="turn__label"><span class="turn__live" aria-hidden="true"></span>지금 차례</span>
+          <span class="turn__player" id="turn-player">플레이어 1</span>
+        </div>
+
+        <div class="scores">
+          <div class="score-card" id="score-0"></div>
+          <div class="score-card" id="score-1"></div>
+        </div>
+
+        <div class="section">
+          <h2 class="section__title">던진 결과 입력</h2>
+          <div class="throw-buttons" id="throw-buttons">
+            <button class="throw-btn throw-btn--back" data-val="-1"><b>백도</b><small>뒤로 1</small></button>
+            <button class="throw-btn" data-val="1"><b>도</b><small>1칸</small></button>
+            <button class="throw-btn" data-val="2"><b>개</b><small>2칸</small></button>
+            <button class="throw-btn" data-val="3"><b>걸</b><small>3칸</small></button>
+            <button class="throw-btn throw-btn--bonus" data-val="4"><b>윷</b><small>4칸 · 한 번 더</small></button>
+            <button class="throw-btn throw-btn--bonus" data-val="5"><b>모</b><small>5칸 · 한 번 더</small></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section__title">사용할 결과 <small class="section__hint">(선택 후 말을 클릭)</small></h2>
+          <div class="chips" id="chips">
+            <span class="chips__empty">아직 입력된 결과가 없어요</span>
+          </div>
+        </div>
+
+        <p class="message" id="message">윷을 던진 뒤 결과 버튼을 누르세요.</p>
+
+        <div class="actions">
+          <button class="btn btn--ghost" id="btn-discard" disabled>선택 결과 버리기</button>
+          <button class="btn btn--primary" id="btn-endturn">턴 넘기기 ▶</button>
+        </div>
+        <div class="actions">
+          <button class="btn btn--danger-ghost" id="btn-reset">새 게임</button>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- 시작 설정(이름 입력) -->
+  <div class="modal" id="setup" hidden>
+    <div class="modal__box setup__box">
+      <div class="modal__emoji">
+        <svg class="setup__logo" viewBox="0 0 32 32" aria-hidden="true">
+          <g transform="rotate(-15 16 16)">
+            <rect x="5.5" y="5" width="4.4" height="22" rx="2.2" fill="#f6ecd0" stroke="#c9a86a" stroke-width=".8"/>
+            <rect x="11" y="5" width="4.4" height="22" rx="2.2" fill="#b07d4b" stroke="#7a5a34" stroke-width=".7"/>
+            <rect x="12.2" y="8" width="1" height="16" rx=".5" fill="rgba(255,255,255,.45)"/>
+            <rect x="16.6" y="5" width="4.4" height="22" rx="2.2" fill="#f6ecd0" stroke="#c9a86a" stroke-width=".8"/>
+            <rect x="22.1" y="5" width="4.4" height="22" rx="2.2" fill="#b07d4b" stroke="#7a5a34" stroke-width=".7"/>
+            <rect x="23.3" y="8" width="1" height="16" rx=".5" fill="rgba(255,255,255,.45)"/>
+          </g>
+        </svg>
+      </div>
+      <h2 class="modal__title">플레이어 이름</h2>
+      <p class="modal__desc">두 플레이어의 이름을 정하고 시작하세요.</p>
+      <label class="setup__field">
+        <span class="setup__dot home-dot--p0"></span>
+        <input id="name-0" class="setup__input" type="text" maxlength="12" placeholder="플레이어 1" autocomplete="off" />
+      </label>
+      <label class="setup__field">
+        <span class="setup__dot home-dot--p1"></span>
+        <input id="name-1" class="setup__input" type="text" maxlength="12" placeholder="플레이어 2" autocomplete="off" />
+      </label>
+      <button class="btn btn--primary" id="setup-start">게임 시작 🚀</button>
+    </div>
+  </div>
+
+  <!-- 승리 모달 -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__box">
+      <div class="modal__emoji">🏆</div>
+      <h2 class="modal__title" id="modal-title">플레이어 1 승리!</h2>
+      <p class="modal__desc">4개의 말이 모두 완주했습니다.</p>
+      <button class="btn btn--primary" id="modal-restart">다시 하기</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
